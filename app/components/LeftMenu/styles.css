@@ -1,0 +1,17 @@
+.list-group {
+  padding: 5px;
+}
+
+.list-group .list-group-item {
+  padding: 5px 10px;
+  font-size: 10pt;
+}
+
+.list-group .list-group-item .badge {
+  margin-right: 5px;
+}
+
+.heading {
+  background-color: #F7F7F7;
+  font-weight: bold;
+}

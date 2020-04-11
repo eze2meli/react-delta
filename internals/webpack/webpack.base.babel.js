@@ -105,6 +105,10 @@ module.exports = options => ({
           },
         },
       },
+      {
+        test: /\.yml$/,
+        use: 'raw-loader',
+      }
     ],
   },
   plugins: options.plugins.concat([
@@ -123,4 +127,8 @@ module.exports = options => ({
   devtool: options.devtool,
   target: 'web', // Make web variables accessible to webpack, e.g. window
   performance: options.performance || {},
+  node: {
+    fs: 'empty',
+    child_process: 'empty',
+  },
 });
