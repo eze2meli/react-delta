@@ -4,7 +4,7 @@
  *
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 // import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
@@ -14,6 +14,7 @@ import { compose } from 'redux';
 import './styles.css';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-yaml';
+import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-github';
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
@@ -92,18 +93,30 @@ export function AppPageSwagger() {
     refs.aceEditor.current.editor.focus();
     setRow(r);
   };
+  // useEffect(() => goTo(0), []); // Will be called on mount
   return (
     <div className="row">
       <Helmet>
         <title>AppPageSwagger</title>
         <meta name="description" content="Description of AppPageSwagger" />
       </Helmet>
-      <div className="col-5 scroll-y">
-        <pre style={{ height: 'calc(100vh - 44px)' }}>
-          {JSON.stringify(yaml.parse(editorText).object, null, 2)}
-        </pre>
+      <div className="col-5 height-pagecontent">
+        <div className="reorderer-controls">
+          <YamlReorderer row={0} text="a: a" />
+        </div>
+        <AceEditor
+          editorProps={{ $blockScrolling: true }}
+          height="calc(100vh - 44px - 38px)"
+          highlightActiveLine={false}
+          mode="json"
+          name="ace-editor-json"
+          readOnly
+          theme="github"
+          value={JSON.stringify(yaml.parse(editorText).object, null, 2)}
+          width="100%"
+        />
       </div>
-      <div className="col-4 px-0 spa-container">
+      <div className="col-4 px-0 height-pagecontent">
         <div className="reorderer-controls">
           <YamlReorderer
             row={row}
@@ -125,7 +138,7 @@ export function AppPageSwagger() {
           width="100%"
         />
       </div>
-      <div className="col-3">
+      <div className="col-3 height-pagecontent">
         <SwaggerToolbox
           row={row}
           rowProp={goTo}

@@ -17,11 +17,13 @@ export default {
     return { object, ex };
   },
   dump: obj => yaml.safeDump(obj, { lineWidth: 1000, noCompatMode: false }),
-  getPathFromPosition: (text, pos) =>
-    getJsonPathForPosition(parseWithPointers(text), {
+  getPathFromPosition: (text, pos) => {
+    // debugger;
+    return getJsonPathForPosition(parseWithPointers(text), {
       line: pos,
-      character: 4,
-    }),
+      character: pos < 10 ? 10 : 100,
+    });
+  },
   getPositionFromPath: (text, path) => {
     const position = getLocationForJsonPath(parseWithPointers(text), path);
     return position.range.start.line + 1;

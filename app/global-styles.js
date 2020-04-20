@@ -34,8 +34,8 @@ const GlobalStyle = createGlobalStyle`
 
   p,
   label {
-    font-family: Georgia, Times, 'Times New Roman', serif;
     line-height: 1.5em;
+    font-size: 12px;
   }
   
   .pagehead {
@@ -56,12 +56,12 @@ const GlobalStyle = createGlobalStyle`
     max-height: calc(100vh - 44px);
   }
   
-  a, a:active, a:visited {
-    color: black!important;
+  .height-pagecontent {
+    height: calc(100vh - 44px);
   }
   
-  .bg-clipboard {
-    background-image:url('data:image/svg+xml;;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="100" viewBox="0 0 4442 720"><path d="M36,297.64c317.62,0,428,134.58,696,136.74S1160,364,1436,389s431.72-102.09,618-91.36,505.93,73.37,715,72.29,339,72,674,64.45,712.27,157.83,920,174l46,111.14H36Z" ></path></svg>')
+  a, a:active, a:visited {
+    color: black!important;
   }
   
   .right {
