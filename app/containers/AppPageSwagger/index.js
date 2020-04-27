@@ -34,7 +34,7 @@ export function AppPageSwagger() {
   // refs
   const refs = { aceEditor: React.createRef() };
   // inits
-  const { object, ex } = yaml.parse(testYaml);
+  const { object, ex } = yaml.parse('{swagger: {}, info: {}}');
   let initEditorText = testYaml;
   if (!ex) {
     initEditorText = yaml.dump(object);
