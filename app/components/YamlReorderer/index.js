@@ -31,7 +31,7 @@ function YamlReorderer({ row, text, textProp = () => {}, rowProp = () => {} }) {
   // parse yaml. Main input for calculus
   // Sanitize
   const { object, ex } = yaml.parse(text); // golang idiomatic where?
-  const json = JSON.stringify(object);
+  const json = JSON.stringify(object) || '{}';
   if (json.includes('null')) {
     return <div>Don&#8217;t use null in values nor texts</div>;
   }
