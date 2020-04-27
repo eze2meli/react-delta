@@ -5,4 +5,10 @@ export default {
     [array[from], array[from + to]] = [array[from + to], array[from]];
     return array;
   },
+  toObj: arr => {
+    const obj = {};
+    arr.forEach(k => {
+      obj[k] = k;
+    });
+  },
 };
