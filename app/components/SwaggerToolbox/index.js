@@ -12,8 +12,15 @@ import '@primer/css/dist/core.css';
 import orderedJson from 'json-order';
 import getValue from 'get-value';
 import isNumber from 'is-number';
-import Octicon, { Check, Repo, Megaphone } from '@primer/octicons-react';
+import Octicon, {
+  Check,
+  Repo,
+  Megaphone,
+  LightBulb,
+} from '@primer/octicons-react';
+import objectPath from 'object-path';
 import yaml from '../../utils/yaml';
+import arrays from '../../utils/arrays';
 
 function SwaggerToolbox({
   row,
@@ -21,6 +28,16 @@ function SwaggerToolbox({
   textProp = () => {},
   rowProp = () => {},
 }) {
+  // Sanitize
+  const { object: o, ex } = yaml.parse(text); // golang idiomatic where?
+  const wholeObject = o || {};
+  const json = JSON.stringify(wholeObject) || '{}';
+  if (json.includes('null')) {
+    return <div>Don&#8217;t use null in values nor texts</div>;
+  }
+  if (ex) {
+    return <div>{JSON.stringify(ex)}</div>;
+  }
   const types = {
     obj: '{...}',
     array: '[...]',
@@ -30,7 +47,7 @@ function SwaggerToolbox({
     type: 'type',
     format: 'fmt',
   };
-  const structure = {
+  const model = {
     $: {
       swagger: types.string,
       info: types.obj,
@@ -88,8 +105,8 @@ function SwaggerToolbox({
     },
     '$.paths.suggest': {
       obj: {
-        'path/to/my/resource': {},
-        'path/{param}/resource': {},
+        '/actualPath/to/my/resource': {},
+        '/actualPath/{param}/resource': {},
       },
     },
     '$.paths.$aPath': {
@@ -137,7 +154,7 @@ function SwaggerToolbox({
     },
     '$.paths.$aPath.$aVerb.parameters.suggest': {
       array: {
-        'path param': { in: 'path' },
+        'actualPath param': { in: 'actualPath' },
         'query param': { in: 'query' },
         'header param': { in: 'header' },
         'body param': { in: 'body', name: 'body' },
@@ -160,7 +177,7 @@ function SwaggerToolbox({
       default: types.string,
     },
     '$.paths.$aPath.$aVerb.parameters.#.items.?info':
-      'It is used when type = array, Specifies array elem structure',
+      'It is used when type = array, Specifies array elem model',
     '$.paths.$aPath.$aVerb.parameters.#.items.enum.#': types.string,
     '$.paths.$aPath.$aVerb.parameters.#.items.enum.suggest': {
       array: {
@@ -173,7 +190,7 @@ function SwaggerToolbox({
       $ref: types.string,
     },
     '$.paths.$aPath.$aVerb.parameters.#.schema.?info':
-      'Used for specify parameter structure',
+      'Used for specify parameter model',
     '$.paths.$aPath.$aVerb.parameters.#.schema.$ref.suggest': {
       value: {
         '#/definitions/aModel': '',
@@ -286,143 +303,168 @@ function SwaggerToolbox({
       url: types.string,
     },
   };
-  let suggestionsSiblings = {};
-  let suggestionsChildren = {};
-  let suggestions = {};
-  let info = null;
-  let actual = '';
-  // Sanitize
-  const { object, ex } = yaml.parse(text); // golang idiomatic where?
-  const json = JSON.stringify(object);
-  if (json.includes('null')) {
-    return <div>Don&#8217;t use null in values nor texts</div>;
-  }
-  if (!ex && !json.includes('null')) {
-    const inferStructureKey = path => {
+  const inferStructureKey = path => {
+    // debugger;
+    if (path.length === 0) {
+      return '$';
+    }
+    // replace array indexes with #
+    const basePath =
+      path
+        .join('.')
+        .replace(/[0-9]/g, '#')
+        .split('.') || [];
+    let key = '$';
+    basePath.forEach(p => {
       // debugger;
-      if (path.length === 0) {
-        return '$';
+      if (key === '?') {
+        return;
       }
-      // replace array indexes with #
-      const basePath =
-        path
-          .join('.')
-          .replace(/[0-9]/g, '#')
-          .split('.') || [];
-      let key = '$';
-      basePath.forEach(p => {
-        // debugger;
-        if (key === '?') {
-          return;
-        }
-        const join = [key, p].join('.');
-        const info = structure[join];
-        if (info) {
+      const join = [key, p].join('.');
+      const info = model[join];
+      if (info) {
+        key = join;
+      } else {
+        const previous = model[key];
+        if (previous[p]) {
           key = join;
         } else {
-          const previous = structure[key];
-          if (previous[p]) {
-            key = join;
+          const variableKey = wholeObject
+            .keys(previous)
+            .filter(k => k.startsWith('$'))
+            .shift();
+          if (variableKey) {
+            key = [key, variableKey].join('.');
           } else {
-            const variableKey = Object.keys(previous)
-              .filter(k => k.startsWith('$'))
-              .shift();
-            if (variableKey) {
-              key = [key, variableKey].join('.');
-            } else {
-              key = '?';
-            }
+            key = '?';
           }
         }
-      });
-      return key;
-    };
-    // getting orderMap. Is a array-based meta-object of object
-    const { map } = orderedJson.parse(json, '$', '.');
-    // console.log(map);
-    //
-    // getting path
-    const path = yaml.getPathFromPosition(text, row) || [];
-    // debugger;
-    const pathCopy = path.slice(0); // copy array
-    // path = ['tags',1,'name']
-    // pathCopy = ['tags',1,'name']
-    //
-    actual = pathCopy.pop();
-    // debugger;
-    const siblingsPath = inferStructureKey(pathCopy);
-    const childrenPath = inferStructureKey(path);
-    const arrayChildrenPath = `${childrenPath}.suggest`;
-    const infoPath = `${childrenPath}.?info`;
-    // actual = 'name'
-    // pathCopy = ['tags',1]
-    // siblingsPath = '$.tags.1'
-    // console.log(path, actual, siblingsPath);
-    //
-    const siblings = map[siblingsPath] || [];
-    const pos = siblings.indexOf(actual);
-    suggestionsChildren = structure[childrenPath] || suggestionsChildren;
-    suggestionsSiblings = structure[siblingsPath] || suggestionsSiblings;
-    suggestions = structure[arrayChildrenPath] || suggestions;
-    info = structure[infoPath];
-    console.log(suggestionsChildren, suggestionsSiblings, arrayChildrenPath);
-    // siblings map['$.tags.1'] => ['name','description']
-    // pos = 0
-    //
-    let array = [];
-    const isActualAnArray = isNumber(actual);
-    const arrayPos = isActualAnArray ? actual : pathCopy.slice(-1).pop();
-    const arrayPath = isActualAnArray ? pathCopy : pathCopy.slice(0, -1);
-    const arrayControls = isNumber(arrayPos);
-    // isActualAnArray = false
-    // arrayPos = 1
-    // arrayPath = ['tags']
-    // arrayControls = true
-    //
-    //
-    // Array move buttons enabling
-    if (arrayControls) {
-      array = getValue(object, arrayPath);
-      // array = [{...},{...},{...}]
-    }
-    const impactObj = reOrderedObject => {
-      // getting new yml (text)
-      const newText = yaml.dump(reOrderedObject);
-      textProp(newText);
-      // getting new position
-      const position = yaml.getPositionFromPath(newText, path);
-      rowProp(position);
-    };
+      }
+    });
+    return key;
+  };
+  // getting orderMap. Is a array-based meta-object of object
+  const { map } = orderedJson.parse(json, '$', '.');
+  // console.log(map);
+  //
+  // getting actualPath
+  const actualPath = yaml.getPathFromPosition(text, row) || [];
+  // debugger;
+  const parentPath = actualPath.slice(0); // copy array
+  // actualPath = ['tags',1,'name']
+  // parentPath = ['tags',1,'name']
+  //
+  const actual = parentPath.pop();
+  // debugger;
+  const siblingsPath = inferStructureKey(parentPath);
+  const childrenPath = inferStructureKey(actualPath);
+  const suggestionPath = `${childrenPath}.suggest`;
+  const infoPath = `${childrenPath}.?info`;
+  // actual = 'name'
+  // parentPath = ['tags',1]
+  // siblingsPath = '$.tags.1'
+  // console.log(actualPath, actual, siblingsPath);
+  //
+  const siblings = map[siblingsPath] || [];
+  const pos = siblings.indexOf(actual);
+  const structure = {};
+  structure.siblings = model[siblingsPath] || {};
+  structure.children = model[childrenPath] || {};
+  const parentObj = objectPath.get(wholeObject, parentPath) || {};
+  let subObj = objectPath.get(wholeObject, actualPath) || {};
+
+  if (subObj instanceof Array) {
+    subObj = arrays.toObj(subObj);
   }
+
+  let info = model[infoPath];
+  let suggestions = model[suggestionPath] || {};
+  if (
+    typeof structure.children === 'string' ||
+    structure.children instanceof String
+  ) {
+    info = `type ${structure.children}`;
+    structure.children = {};
+    // If we are on a leaf, it is possible we are in an array and it has suggestions
+    suggestions = model[`${siblingsPath}.suggest`] || suggestions;
+  }
+
+  console.log(structure.children, structure.siblings, suggestionPath);
+  // siblings map['$.tags.1'] => ['name','description']
+  // pos = 0
+  //
+  let array = [];
+  const isActualAnArray = isNumber(actual);
+  const arrayPos = isActualAnArray ? actual : parentPath.slice(-1).pop();
+  const arrayPath = isActualAnArray ? parentPath : parentPath.slice(0, -1);
+  const arrayControls = isNumber(arrayPos);
+  // isActualAnArray = false
+  // arrayPos = 1
+  // arrayPath = ['tags']
+  // arrayControls = true
+  //
+  //
+  // Array move buttons enabling
+  if (arrayControls) {
+    array = getValue(wholeObject, arrayPath);
+    // array = [{...},{...},{...}]
+  }
+  const impactObj = reOrderedObject => {
+    // getting new yml (text)
+    const newText = yaml.dump(reOrderedObject);
+    textProp(newText);
+    // getting new position
+    const position = yaml.getPositionFromPath(newText, actualPath);
+    rowProp(position);
+  };
+  const impactObjectS = (actualObj, actualObjPath, key, value) => {
+    // setear el valor en el objeto (sub o parent)
+    // tomar el objeto y setearlo por actualPath
+    // notificar cambio
+    actualObj[key] = value;
+    if (actualObjPath.length > 0) {
+      objectPath.set(wholeObject, actualObjPath, actualObj);
+    }
+    const newText = yaml.dump(wholeObject);
+    textProp(newText);
+  };
   const typeLabel = txt => (
     <label className="bg-gray border m-0 px-1 rounded-1 text-gray">{txt}</label>
   );
-  const renderSymbol = key =>
-    typeLabel(
-      suggestionsSiblings[key]
-        ? suggestionsSiblings[key]
-        : suggestionsChildren[key],
-    );
-  const renderSuggestionBoxClass = key =>
+  const renderRowClass = key =>
     `Box-row flex-items-center p-0 v-align-middle${
       key === actual ? ' bg-yellow-1' : ''
     }`;
-  const renderSuggestionBox = (key, i) => (
-    <div className={renderSuggestionBoxClass(key)} key={i}>
-      <div className="d-flex">
-        <div className="flex-auto lh-condensed min-width-0 p-2 pr-3">
-          <div>
-            {renderSymbol(key)} {key}{' '}
+  const renderStructureRow = (key, i, params) => {
+    const applied = params.actualObj[key];
+    return (
+      <div className={renderRowClass(key)} key={i}>
+        <div className="d-flex">
+          <div className="flex-auto lh-condensed min-width-0 p-2 pr-3">
+            <div>
+              {typeLabel(params.elems[key])} {key}{' '}
+            </div>
           </div>
-        </div>
-        <div className="bg-gray border border-gray-dark d-flex flex-items-center m-1 mr-1 px-2 rounded-1 text-gray">
-          <Octicon icon={Check} /> Applied
+          <button
+            type="button"
+            disabled={false}
+            className="bg-gray border border-gray-dark d-flex flex-items-center m-1 mr-1 px-2 rounded-1 text-gray"
+            onClick={() => impactObjectS(params.actualObj, params.path, key, {})}
+          >
+            {applied ? (
+              <span>
+                <Octicon icon={Check} /> Applied
+              </span>
+            ) : (
+              <span>Apply</span>
+            )}
+          </button>
         </div>
       </div>
-    </div>
-  );
-  const renderArraySuggestionBox = (key, i) => (
-    <div className="Box-row flex-items-center p-0 v-align-middle" key={i}>
+    );
+  };
+  const renderSuggestionRow = (key, i, params) => (
+    <div className={renderRowClass(key)} key={i}>
       <div className="d-flex">
         <div className="flex-auto lh-condensed min-width-0 p-2 pr-3">
           <div>
@@ -435,16 +477,20 @@ function SwaggerToolbox({
       </div>
     </div>
   );
-  const renderBox = (title, elems, func) =>
-    elems &&
-    Object.keys(elems).length > 0 && (
-      <div className="border-box my-1">
-        <div className="Box-header p-2 Box-title">
-          <Octicon icon={Repo} /> {title}
+  const renderBox = (title, elems, func, actualObj, path, ico = Repo) => {
+    const params = { title, elems, func, actualObj, path, ico };
+    return (
+      elems &&
+      Object.keys(elems).length > 0 && (
+        <div className="border-box my-1">
+          <div className="Box-header p-2 Box-title">
+            <Octicon icon={ico} className="mr-1" /> {title}
+          </div>
+          {Object.keys(elems).map((key, i) => func(key, i, params))}
         </div>
-        {Object.keys(elems).map(func)}
-      </div>
+      )
     );
+  };
   const renderInfoBox = () =>
     info && (
       <div className="border-box my-1">
@@ -465,28 +511,41 @@ function SwaggerToolbox({
     <div style={{ height: 'inherit' }}>
       {renderBox(
         'Structure elems suggestions',
-        suggestionsSiblings,
-        renderSuggestionBox,
+        structure.siblings,
+        renderStructureRow,
+        parentObj,
+        parentPath,
       )}
       {renderBox(
         'Structure subElems suggestions',
-        suggestionsChildren,
-        renderSuggestionBox,
+        structure.children,
+        renderStructureRow,
+        subObj,
+        actualPath,
       )}
       {renderBox(
         'Value suggestions',
         suggestions.value,
-        renderArraySuggestionBox,
+        renderSuggestionRow,
+        subObj,
+        actualPath,
+        LightBulb,
       )}
       {renderBox(
         'Array subElems suggestions',
         suggestions.array,
-        renderArraySuggestionBox,
+        renderSuggestionRow,
+        subObj,
+        actualPath,
+        LightBulb,
       )}
       {renderBox(
         'Object subElems suggestions',
         suggestions.obj,
-        renderArraySuggestionBox,
+        renderSuggestionRow,
+        subObj,
+        actualPath,
+        LightBulb,
       )}
       {renderInfoBox()}
     </div>
