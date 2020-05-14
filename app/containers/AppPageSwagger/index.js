@@ -34,7 +34,14 @@ export function AppPageSwagger() {
   // refs
   const refs = { aceEditor: React.createRef() };
   // inits
-  const { object, ex } = yaml.parse('{swagger: {}, info: {}}');
+  const { object, ex } = yaml.parse(
+    'swagger: {}\n' +
+      'info: {}\n' +
+      'paths:\n' +
+      '  /actualPath/to/my/resource:\n' +
+      '    get:\n' +
+      '      tags: []',
+  );
   let initEditorText = testYaml;
   if (!ex) {
     initEditorText = yaml.dump(object);
@@ -93,6 +100,9 @@ export function AppPageSwagger() {
     refs.aceEditor.current.editor.focus();
     setRow(r);
   };
+  const focus = () => {
+    refs.aceEditor.current.editor.focus();
+  };
   // useEffect(() => goTo(0), []); // Will be called on mount
   return (
     <div className="row">
@@ -144,6 +154,7 @@ export function AppPageSwagger() {
           rowProp={goTo}
           text={editorText}
           textProp={setEditorText}
+          textFocusProp={focus}
         />
       </div>
     </div>
