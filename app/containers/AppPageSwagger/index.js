@@ -34,18 +34,7 @@ export function AppPageSwagger() {
   // refs
   const refs = { aceEditor: React.createRef() };
   // inits
-  const { object, ex } = yaml.parse(
-    'swagger: {}\n' +
-      'info: {}\n' +
-      'paths:\n' +
-      '  /actualPath/to/my/resource:\n' +
-      '    get:\n' +
-      '      tags: []',
-  );
-  let initEditorText = testYaml;
-  if (!ex) {
-    initEditorText = yaml.dump(object);
-  }
+  const initEditorText = testYaml;
   // State Hooks
   const [editorText, setEditorText] = useState(initEditorText);
   const [row, setRow] = useState(0);
