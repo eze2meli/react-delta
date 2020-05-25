@@ -16,6 +16,8 @@ import yaml from '../../utils/yaml';
 import arrays from '../../utils/arrays';
 import funcs from './suggestion/index';
 import model from './meta/model';
+import modelInfo from './meta/modelInfo';
+import modelSuggest from './meta/modelSuggest';
 
 function SwaggerToolbox({
   row,
@@ -88,8 +90,6 @@ function SwaggerToolbox({
   // debugger;
   const siblingsPath = inferStructureKey(parentPath);
   const childrenPath = inferStructureKey(actualPath);
-  const suggestionPath = `${childrenPath}.suggest`;
-  const infoPath = `${childrenPath}.?info`;
   // actual = 'name'
   // parentPath = ['tags',1]
   // siblingsPath = '$.tags.1'
@@ -107,13 +107,13 @@ function SwaggerToolbox({
     subObj = arrays.toObj(subObj);
   }
 
-  let info = model[infoPath];
-  let suggestions = model[suggestionPath] || {};
+  let info = modelInfo[childrenPath];
+  let suggestions = modelSuggest[childrenPath] || {};
   if (structure.children.$isAType) {
     info = `${structure.children.symbol}:\n${structure.children.description}`;
     structure.children = {};
     // If we are on a leaf, it is possible we are in an array and it has suggestions
-    suggestions = model[`${siblingsPath}.suggest`] || suggestions;
+    suggestions = modelSuggest[siblingsPath] || suggestions;
   }
 
   console.log(parentPath, actualPath);
