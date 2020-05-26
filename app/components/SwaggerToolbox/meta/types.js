@@ -10,6 +10,6 @@ export default {
   boolean: type('bool', true, ''),
   string: type('str', '', "It's a String"),
   value: type('val', null, ''),
-  type: type('bool', 'String', ''),
+  type: type('type', 'It is a type', ''),
   format: type('fmt', 'aFormat', ''),
 };

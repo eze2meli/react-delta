@@ -1,3 +1,31 @@
+const fmtSuggest = {
+  value: {
+    float: 'float',
+    double: 'double',
+    int32: 'int32',
+    int64: 'int64',
+    date: 'date',
+    'date-time': 'date-time',
+    password: 'password',
+    byte: 'byte',
+    binary: 'binary',
+    email: 'email',
+    uuid: 'uuid',
+    uri: 'uri',
+    hostname: 'hostname',
+    ipv4: 'ipv4',
+    ipv6: 'ipv6',
+    other: 'other',
+  },
+};
+const typeSuggest = {
+  value: {
+    string: 'string',
+    integer: 'integer',
+    number: 'number',
+    boolean: 'boolean',
+  },
+};
 export default {
   $: null,
   '$.swagger': {
@@ -73,6 +101,13 @@ export default {
     },
   },
   '$.paths.$aPath.$aVerb.parameters.#': null,
+  '$.paths.$aPath.$aVerb.parameters.#.in': {
+    value: {
+      query: 'query',
+      header: 'header',
+      body: 'body',
+    },
+  },
   '$.paths.$aPath.$aVerb.parameters.#.items': null,
   '$.paths.$aPath.$aVerb.parameters.#.items.enum': {
     array: {
@@ -85,9 +120,12 @@ export default {
   '$.paths.$aPath.$aVerb.parameters.#.schema': null,
   '$.paths.$aPath.$aVerb.parameters.#.schema.$ref': {
     value: {
-      '#/definitions/aModel': null,
+      '#/definitions/aModel': { $avoidRenderBtn: true },
     },
+    modelReference: {},
   },
+  '$.paths.$aPath.$aVerb.parameters.#.type': typeSuggest,
+  '$.paths.$aPath.$aVerb.parameters.#.format': fmtSuggest,
   '$.paths.$aPath.$aVerb.responses': {
     obj: {
       default: {
@@ -140,6 +178,13 @@ export default {
   '$.definitions.$aDef': null,
   '$.definitions.$aDef.properties': null,
   '$.definitions.$aDef.properties.$aProp': null,
+  '$.definitions.$aDef.properties.$aProp.type': typeSuggest,
+  '$.definitions.$aDef.properties.$aProp.format': fmtSuggest,
+  '$.definitions.$aDef.properties.$aProp.pattern': {
+    value: {
+      '^\\d{3}-\\d{2}-\\d{4}$': '^\\d{3}-\\d{2}-\\d{4}$',
+    },
+  },
   '$.definitions.$aDef.xml': null,
   '$.externalDocs': null,
 };

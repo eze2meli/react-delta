@@ -125,6 +125,7 @@ export default {
   },
   '$.definitions.$aDef.properties.$aProp': {
     type: types.type,
+    pattern: types.string,
     format: types.format,
     default: types.value,
   },

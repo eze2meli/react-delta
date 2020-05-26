@@ -10,5 +10,6 @@ export default {
     arr.forEach(k => {
       obj[k] = k;
     });
+    return obj;
   },
 };
