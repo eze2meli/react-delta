@@ -13,6 +13,16 @@ paths:
       - in: query
         type: integer
         format: int64
+securityDefinitions:
+  OAuth2:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: 'https://example.com/oauth/authorize'
+    tokenUrl: 'https://example.com/oauth/token'
+    scopes:
+      read: Grants read access
+      write: Grants write access
+      admin: Grants read and write access to administrative information
 definitions:
   cat:
     properties:

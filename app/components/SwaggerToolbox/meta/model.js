@@ -100,8 +100,12 @@ export default {
   },
   '$.securityDefinitions.$aSecurityDef': {
     type: types.string,
-    authorizationUrl: types.string,
+    description: types.string,
+    name: types.string,
+    in: types.string,
     flow: types.string,
+    authorizationUrl: types.string,
+    tokenUrl: types.string,
     scopes: types.obj,
   },
   '$.securityDefinitions.$aSecurityDef.scopes': {

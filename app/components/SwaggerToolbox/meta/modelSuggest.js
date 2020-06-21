@@ -165,8 +165,75 @@ export default {
     },
   },
   '$.paths.$aPath.$aVerb.security.#.$aSecurityDef.#': null,
-  '$.securityDefinitions': null,
+  '$.securityDefinitions': {
+    obj: {
+      BasicAuth: {
+        type: 'basic',
+        description: 'basic security',
+      },
+      ApiKeyAuth: {
+        type: 'apiKey',
+        description: 'Api Key Security',
+        name: 'X-Admin-Id',
+        in: 'header',
+      },
+      OAuth2: {
+        type: 'oauth2',
+        description: 'OAuth2 Security',
+        flow: 'accessCode',
+        authorizationUrl: 'https://example.com/oauth/authorize',
+        tokenUrl: 'https://example.com/oauth/token',
+        scopes: {
+          read: 'Grants read access',
+          write: 'Grants write access',
+          admin: 'Grants read and write access to administrative information',
+        },
+      },
+    },
+  },
   '$.securityDefinitions.$aSecurityDef': null,
+  '$.securityDefinitions.$aSecurityDef.type': {
+    value: {
+      basic: 'basic',
+      apiKey: 'apiKey',
+      oauth2: 'oauth2',
+    },
+  },
+  '$.securityDefinitions.$aSecurityDef.description': {
+    value: {
+      'A description': 'A description',
+    },
+  },
+  '$.securityDefinitions.$aSecurityDef.name': {
+    value: {
+      'X-Admin-Id': 'X-Admin-Id',
+    },
+  },
+  '$.securityDefinitions.$aSecurityDef.in': {
+    value: {
+      query: 'query',
+      header: 'header',
+    },
+  },
+  '$.securityDefinitions.$aSecurityDef.flow': {
+    value: {
+      implicit: 'implicit',
+      password: 'password',
+      application: 'application',
+      accessCode: 'accessCode',
+    },
+  },
+  '$.securityDefinitions.$aSecurityDef.authorizationUrl': {
+    value: {
+      'https://example.com/oauth/authorize':
+        'https://example.com/oauth/authorize',
+    },
+  },
+  '$.securityDefinitions.$aSecurityDef.tokenUrl': {
+    value: {
+      'https://example.com/oauth/token': 'https://example.com/oauth/token',
+    },
+  },
   '$.securityDefinitions.$aSecurityDef.scopes': {
     obj: {
       'write:aResource': 'Writes a resource',
