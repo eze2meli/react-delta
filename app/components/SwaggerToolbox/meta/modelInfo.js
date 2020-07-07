@@ -25,7 +25,10 @@ export default {
   '$.paths.$aPath.$aVerb.responses.$aRespCode.schema': '',
   '$.paths.$aPath.$aVerb.responses.$aRespCode.headers': '',
   '$.paths.$aPath.$aVerb.responses.$aRespCode.headers.$aHeaderName': '',
-  '$.paths.$aPath.$aVerb.security.#': '',
+  '$.paths.$aPath.$aVerb.security':
+    'Security schemas used by this endpoint. May have several schemas',
+  '$.paths.$aPath.$aVerb.security.#.$aSecurityDef':
+    'Only OAuth2 security definitions can specify scopes',
   '$.paths.$aPath.$aVerb.security.#.$aSecurityDef.#': '',
   '$.securityDefinitions': '',
   '$.securityDefinitions.$aSecurityDef': '',

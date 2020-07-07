@@ -153,9 +153,7 @@ export default {
   '$.paths.$aPath.$aVerb.responses.$aRespCode.headers': null,
   '$.paths.$aPath.$aVerb.responses.$aRespCode.headers.$aHeaderName': null,
   '$.paths.$aPath.$aVerb.security': {
-    array: {
-      aSecurityDef: [],
-    },
+    securityModelReference: {},
   },
   '$.paths.$aPath.$aVerb.security.#': null,
   '$.paths.$aPath.$aVerb.security.#.$aSecurityDef': {
@@ -163,6 +161,7 @@ export default {
       'write:aResource': '',
       'read:aResource': '',
     },
+    securityScopeReference: {},
   },
   '$.paths.$aPath.$aVerb.security.#.$aSecurityDef.#': null,
   '$.securityDefinitions': {

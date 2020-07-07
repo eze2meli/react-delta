@@ -4,6 +4,9 @@ info:
 paths:
   /actualPath/to/my/resource:
     get:
+      security:
+      - BasicAuth: []
+      - OAuth2: []
       tags: []
       parameters:
       - in: body
@@ -14,6 +17,9 @@ paths:
         type: integer
         format: int64
 securityDefinitions:
+  BasicAuth:
+    type: basic
+    description: basic security
   OAuth2:
     type: oauth2
     flow: accessCode

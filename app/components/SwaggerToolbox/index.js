@@ -121,6 +121,25 @@ function SwaggerToolbox({
     definitions = Object.keys(definitions).map(def => `#/definitions/${def}`);
     suggestions.modelReference = arrays.toObj(definitions);
   }
+  if (suggestions.securityModelReference) {
+    const definitions =
+      objectPath.get(wholeObject, 'securityDefinitions') || {};
+    const secDef = {};
+    Object.keys(definitions).forEach(k => {
+      secDef[k] = {};
+      secDef[k][k] = [];
+    });
+    suggestions.array = secDef;
+  }
+  if (suggestions.securityScopeReference) {
+    suggestions.array = {};
+    const definitions =
+      objectPath.get(wholeObject, `securityDefinitions.${actual}`) || {};
+    if (definitions.type === 'oauth2') {
+      const scopes = definitions.scopes || {};
+      suggestions.array = arrays.toObj(Object.keys(scopes));
+    }
+  }
 
   console.log(parentPath, actualPath);
   // siblings map['$.tags.1'] => ['name','description']

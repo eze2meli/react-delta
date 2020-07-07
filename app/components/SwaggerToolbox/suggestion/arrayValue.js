@@ -12,6 +12,6 @@ export default {
     const objKey = params.path.slice(-1).pop();
     // TODO verify actualObj is array. If not warn user
     const arr = actualObj[objKey] || [];
-    return arr.includes(params.elems[key]);
+    return arr.includes(key);
   },
 };
