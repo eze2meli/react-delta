@@ -58,6 +58,7 @@ const GlobalStyle = createGlobalStyle`
   
   .height-pagecontent {
     height: calc(100vh - 44px);
+    overflow-y: scroll;
   }
   
   a, a:active, a:visited {

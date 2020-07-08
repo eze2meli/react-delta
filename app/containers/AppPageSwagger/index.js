@@ -19,6 +19,7 @@ import 'ace-builds/src-noconflict/theme-github';
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
 
+import SwaggerUI from 'swagger-ui-react';
 import testYaml from './test.yml';
 
 import makeSelectAppPageSwagger from './selectors';
@@ -27,6 +28,7 @@ import saga from './saga';
 import SwaggerToolbox from '../../components/SwaggerToolbox';
 import yaml from '../../utils/yaml';
 import YamlReorderer from '../../components/YamlReorderer';
+import 'swagger-ui-react/swagger-ui.css';
 
 export function AppPageSwagger() {
   useInjectReducer({ key: 'appPageSwagger', reducer });
@@ -100,20 +102,7 @@ export function AppPageSwagger() {
         <meta name="description" content="Description of AppPageSwagger" />
       </Helmet>
       <div className="col-5 height-pagecontent">
-        <div className="reorderer-controls">
-          <YamlReorderer row={0} text="a: a" />
-        </div>
-        <AceEditor
-          editorProps={{ $blockScrolling: true }}
-          height="calc(100vh - 44px - 38px)"
-          highlightActiveLine={false}
-          mode="json"
-          name="ace-editor-json"
-          readOnly
-          theme="github"
-          value={JSON.stringify(yaml.parse(editorText).object, null, 2)}
-          width="100%"
-        />
+        <SwaggerUI spec={yaml.parse(editorText).object} />
       </div>
       <div className="col-4 px-0 height-pagecontent">
         <div className="reorderer-controls">
