@@ -73,7 +73,7 @@
     "compression": "1.7.4",
     "connected-react-router": "6.4.0",
     "cross-env": "5.2.0",
-    "express": "4.16.4",
+    "express": "4.18.2",
     "fontfaceobserver": "2.1.0",
     "history": "4.9.0",
     "hoist-non-react-statics": "3.3.0",
@@ -99,7 +99,7 @@
     "sanitize.css": "8.0.0",
     "styled-components": "4.2.0",
     "styled-system": "^5.1.5",
-    "swagger-ui-react": "^3.28.0"
+    "swagger-ui-react": "^3.52.5"
   },
   "devDependencies": {
     "@babel/cli": "7.4.3",
